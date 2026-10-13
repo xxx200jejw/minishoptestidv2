@@ -100,10 +100,10 @@ export class ShopPage {
   }
 
   quantity(name: string): Locator {
-  return this.page.getByRole('spinbutton', {
-    name: `Quantity for ${name}`,
-  });
-}
+    return this.page.getByRole('spinbutton', {
+      name: `Quantity for ${name}`,
+    });
+  }
 
   lineTotal(name: string): Locator {
     return this.cartRows()
@@ -151,4 +151,3 @@ export class ShopPage {
     return this.error('address');
   }
 }
-

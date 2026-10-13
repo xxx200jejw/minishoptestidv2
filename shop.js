@@ -30,8 +30,8 @@ const money = (n) => n.toFixed(2) + ' €';
 
 function sortProducts(list, mode) {
   const copy = [...list];
-  if (mode === 'price-asc') copy.sort((a, b) => String(a.price).localeCompare(String(b.price)));  
-  if (mode === 'price-desc') copy.sort((a, b) => String(b.price).localeCompare(String(a.price)));  
+  if (mode === 'price-asc') copy.sort((a, b) => a.price - b.price);
+  if (mode === 'price-desc') copy.sort((a, b) => b.price - a.price);
   if (mode === 'name') copy.sort((a, b) => a.name.localeCompare(b.name));
   return copy;
 }
@@ -57,7 +57,7 @@ function renderCart() {
     return;
   }
   const subtotal = rows.reduce((s, r) => s + r.p.price * r.qty, 0);
-  const discount = rows.length ? rows[0].p.price * rows[0].qty * discountRate : 0;   
+  const discount = subtotal * discountRate;
   const total = subtotal - discount;
   $('#cart-body').innerHTML = `
     <table aria-label="Basket items">
@@ -65,7 +65,7 @@ function renderCart() {
       <tbody>${rows.map((r) => `
         <tr data-testid="cart-row" data-id="${r.p.id}">
           <td>${r.p.name}</td><td>${money(r.p.price)}</td>
-          <td><input type="number" value="${r.qty}" data-qty="${r.p.id}" aria-label="Quantity for ${r.p.name}"></td>
+          <td><input type="number" min="1" value="${Math.max(r.qty, 1)}" data-qty="${r.p.id}" aria-label="Quantity for ${r.p.name}"></td>
           <td data-testid="line-total">${money(r.p.price * r.qty)}</td>
           <td><button type="button" class="secondary" data-remove="${r.p.id}" aria-label="Remove ${r.p.name}">Remove</button></td>
         </tr>`).join('')}
@@ -107,7 +107,8 @@ document.addEventListener('click', (e) => {
 document.addEventListener('change', (e) => {
   const q = e.target.closest('[data-qty]');
   if (q) {
-    const qty = Number(q.value);                                 
+    const qty = Math.max(1, Number(q.value) || 1);
+    q.value = String(qty);
     cart.set(Number(q.dataset.qty), qty);
     renderCart();
   }
